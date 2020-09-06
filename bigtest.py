@@ -8,11 +8,13 @@ with open('fulldata.p', 'rb') as f:
 vactrajs = data['vactrajs']
 
 tracktrajs = {}
-tracktrajs[0] = vactrajs[0]
+tracktrajs[0] = vactrajs[0][:,1:]
 for frame in range(len(vactrajs)-1):
     second = vactrajs[frame+1][:,1:].copy(order='C')
-    first = vactrajs[frame][:,1:].copy(order='C')
-    result = find_points_in_spheres(center_coords = first, all_coords = second, r = 3, pbc = np.array([1,1,1]), lattice = data['cell'])
+    # shapes of first and second must be identical otherwise malloc will freak out because of invalid chunk sizing, hence we slice 'second'
+    if len(tracktrajs[frame]) != len(second):
+        second = second[:len(tracktrajs[frame]),:]
+    result = find_points_in_spheres(center_coords = tracktrajs[frame].copy(order='C'), all_coords = second, r = 3, pbc = np.array([1,1,1]).copy(order='C'), lattice = data['cell'].copy(order='C'))
     tracktrajs[frame+1] = second[result[1][:len(second)]]
 
 print(tracktrajs[frame])
