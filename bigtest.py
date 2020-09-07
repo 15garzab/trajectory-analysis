@@ -1,6 +1,7 @@
 import pickle
-import numpy as np
 from pymatgen.optimization.neighbors import find_points_in_spheres
+import numpy as np
+
 
 with open('fulldata.p', 'rb') as f:
     data = pickle.load(f)
@@ -14,7 +15,10 @@ for frame in range(len(vactrajs)-1):
     # shapes of first and second must be identical otherwise malloc will freak out because of invalid chunk sizing, hence we slice 'second'
     if len(tracktrajs[frame]) != len(second):
         second = second[:len(tracktrajs[frame]),:]
-    result = find_points_in_spheres(center_coords = tracktrajs[frame].copy(order='C'), all_coords = second, r = 3, pbc = np.array([1,1,1]).copy(order='C'), lattice = data['cell'].copy(order='C'))
+    result = find_points_in_spheres(center_coords = tracktrajs[frame].copy(order='C'), all_coords = second, r = 3, pbc = np.array([1,1,1]).copy(order='C'), lattice = data['cell'].copy(order='C').astype('double'))
     tracktrajs[frame+1] = second[result[1][:len(second)]]
+    print(np.shape(tracktrajs[frame+1]))
 
-print(tracktrajs[frame])
+
+arr = np.array(list(tracktrajs.values()), dtype=float)
+print(np.shape(arr))
